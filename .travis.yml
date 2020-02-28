@@ -12,4 +12,3 @@ os:
   - linux
 notifications:
   email: false
-coveralls: true
