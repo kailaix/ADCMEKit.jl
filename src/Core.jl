@@ -24,6 +24,7 @@ function lineview(sess::PyObject, pl::PyObject, loss::PyObject, θ1, θ2=nothing
     dat = linedata(θ1, θ2, n=n)
     V = zeros(length(dat))
     for i = 1:length(dat)
+        @info i, n 
         V[i] = run(sess, loss, pl=>dat[i])
     end
     lineview(V)
@@ -54,6 +55,7 @@ function meshview(losses::Array{Float64}, a::Real=1, b::Real=1)
     as = LinRange(-a, a, m)
     bs = LinRange(-b, b, n)
     for i = 1:m 
+        @info i, m
         for j = 1:n 
             α[i,j] = as[i]
             β[i,j] = bs[j]
