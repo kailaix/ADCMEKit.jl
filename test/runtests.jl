@@ -1,4 +1,4 @@
-using LandscapeView
+using ADCMEKit
 using LinearAlgebra
 using Test
 
@@ -10,7 +10,7 @@ lineview(l)
 close("all")
 v = meshview(zeros(10))
 l = loss1.(v)
-landscapeview(l)
+meshview(l)
 
 # pl = placeholder(Float64, shape=[2])
 # l = sum(pl^2-pl*0.1)

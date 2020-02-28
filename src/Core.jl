@@ -1,5 +1,5 @@
 export linedata, lineview, meshdata, meshview, gradview
-function linedata(θ1, θ2=nothing; n = 10)
+function linedata(θ1, θ2=nothing; n::Integer = 10)
     if θ2 === nothing
         θ2 = θ1 .* (1 .+ randn(size(θ1)...))
     end
@@ -10,7 +10,7 @@ function linedata(θ1, θ2=nothing; n = 10)
     T
 end
 
-function lineview(losses)
+function lineview(losses::Array{Float64})
     n = length(losses)
     v = collect(LinRange(0.0,1.0,n))
     plot(v, losses)
@@ -19,7 +19,16 @@ function lineview(losses)
     grid("on")
 end
 
-function meshdata(θ, a=1, b=1, m=10, n=10)
+function lineview(sess::PyObject, pl::PyObject, loss::PyObject, θ1, θ2=nothing; n::Integer = 10)
+    dat = linedata(θ1, θ2, n=n)
+    V = zeros(length(dat))
+    for i = 1:length(dat)
+        V[i] = run(sess, loss, pl=>dat[i])
+    end
+    lineview(V)
+end
+
+function meshdata(θ, a::Real=1, b::Real=1, m::Integer=10, n::Integer=10)
     as = LinRange(-a, a, m)
     bs = LinRange(-b, b, n)
     α = zeros(m, n)
@@ -37,7 +46,7 @@ function meshdata(θ, a=1, b=1, m=10, n=10)
     return θs
 end
 
-function meshview(losses, a=1, b=1)
+function meshview(losses::Array{Float64}, a::Real=1, b::Real=1)
     m, n = size(losses)
     α = zeros(m, n)
     β = zeros(m, n)
@@ -54,9 +63,23 @@ function meshview(losses, a=1, b=1)
     xlabel("\$\\alpha\$")
     ylabel("\$\\beta\$")
     zlabel("loss")
+    return α, β, losses
 end
 
-function gradview(sess, pl, grad, loss, u0)
+function meshview(sess::PyObject, pl::PyObject, loss::PyObject, θ, a::Real=1, b::Real=1, m::Integer=10, n::Integer=10)
+    dat = meshdata(θ, a=a, b=b, m=m, n=n)
+    m, n = size(dat)
+    V = zeros(m, n)
+    for i = 1:m 
+        for j = 1:n 
+            V[i,j] = run(sess, loss, pl=>dat[i,j])
+        end
+    end
+    meshview(V, a = a, b = b)
+end
+
+function gradview(sess::PyObject, pl::PyObject, loss::PyObject, u0)
+    grad = gradients(loss, pl)
     v = rand(length(u0))
     γs = 1.0 ./ 10 .^ (1:5)
     v1 = Float64[]
@@ -82,4 +105,5 @@ function gradview(sess, pl, grad, loss, u0)
     legend()
     xlabel("\$\\gamma\$")
     ylabel("Error")
+    return v1, v2
 end
