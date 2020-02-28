@@ -1,5 +1,5 @@
-export linedata, lineview, landscapedata, landscapeview
-function linedata(θ1, θ2=nothing; n = 20)
+export linedata, lineview, meshdata, meshview
+function linedata(θ1, θ2=nothing; n = 10)
     if θ2 === nothing
         θ2 = θ1 .* (1 .+ randn(size(θ1)...))
     end
@@ -19,7 +19,7 @@ function lineview(losses)
     grid("on")
 end
 
-function landscapedata(θ, a=1, b=1, m=20, n=20)
+function meshdata(θ, a=1, b=1, m=10, n=10)
     as = LinRange(-a, a, m)
     bs = LinRange(-b, b, n)
     α = zeros(m, n)
@@ -37,7 +37,7 @@ function landscapedata(θ, a=1, b=1, m=20, n=20)
     return θs
 end
 
-function landscapeview(losses, a=1, b=1)
+function meshview(losses, a=1, b=1)
     m, n = size(losses)
     α = zeros(m, n)
     β = zeros(m, n)

@@ -8,6 +8,6 @@ l = loss1.(v)
 lineview(l)
 
 close("all")
-v = landscapedata(zeros(10))
+v = meshview(zeros(10))
 l = loss1.(v)
 landscapeview(l)
