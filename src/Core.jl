@@ -1,5 +1,8 @@
 export linedata, lineview, landscapedata, landscapeview
-function linedata(θ1, θ2; n = 20)
+function linedata(θ1, θ2=nothing; n = 20)
+    if θ2 === nothing
+        θ2 = θ1 .* (1 .+ randn(size(θ1)...))
+    end
     T = []
     for x in LinRange(0.0,1.0,n)
         push!(T, θ1*(1-x)+θ2*x)
