@@ -13,6 +13,7 @@ end
 function lineview(losses::Array{Float64})
     n = length(losses)
     v = collect(LinRange(0.0,1.0,n))
+    close("all")
     plot(v, losses)
     xlabel("\$\\alpha\$")
     ylabel("loss")
@@ -67,7 +68,7 @@ function meshview(losses::Array{Float64}, a::Real=1, b::Real=1)
 end
 
 function meshview(sess::PyObject, pl::PyObject, loss::PyObject, θ, a::Real=1, b::Real=1, m::Integer=10, n::Integer=10)
-    dat = meshdata(θ, a=a, b=b, m=m, n=n)
+    dat = meshdata(θ, a, b, m, n)
     m, n = size(dat)
     V = zeros(m, n)
     for i = 1:m 
@@ -75,7 +76,7 @@ function meshview(sess::PyObject, pl::PyObject, loss::PyObject, θ, a::Real=1, b
             V[i,j] = run(sess, loss, pl=>dat[i,j])
         end
     end
-    meshview(V, a = a, b = b)
+    meshview(V, a, b)
 end
 
 function gradview(sess::PyObject, pl::PyObject, loss::PyObject, u0)

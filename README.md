@@ -1,6 +1,8 @@
 # ADCMEKit
 
-ADCMEKit is used to plot the loss landscape. 
+ADCMEKit is used to facilitate inverse modeling using [ADCME](https://github.com/kailaix/ADCME.jl). 
+
+## Basic Functions
 
 `linedata(a, b)`: generate (1-α)a+αb as a function of α
 
@@ -25,6 +27,24 @@ meshview(l)
 | ![](./others/f1.png) | ![](./others/f2.png) |
 
 
+## Use with ADCME 
+
+`lineview(sess, pl, loss, θ1)`
+```julia
+pl = placeholder(Float64, shape=[2])
+l = sum(pl^2-pl*0.1)
+sess = Session(); init(sess)
+lineview(sess, pl, l, rand(2))
+```
+
+`meshview(sess, pl, loss, θ1)`
+```julia
+pl = placeholder(Float64, shape=[2])
+l = sum(pl^2-pl*0.1)
+sess = Session(); init(sess)
+meshview(sess, pl, l, rand(2))
+```
+
 `gradview(sess, pl, loss, u0)`: use with ADCME.jl to test gradients
 
 ```julia
@@ -33,4 +53,6 @@ l = sum(pl^2-pl*0.1)
 sess = Session(); init(sess)
 gradview(sess, pl, l, rand(2))
 ```
-![](./others/f3.png)
+| `lineview`           | `meshview`      | `gradview` |
+| -------------------- | -------------------- | -------------------- |
+| ![](./others/f4.png) | ![](./others/f5.png) | ![](./others/f3.png) |
