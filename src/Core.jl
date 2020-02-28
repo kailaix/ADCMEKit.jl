@@ -63,6 +63,7 @@ function gradview(sess, pl, grad, loss, u0)
     v2 = Float64[]
     L_, J_ = run(sess, [loss, grad], pl=>u0)
     for i = 1:5
+        @info i 
         L__ = run(sess, loss, pl=>u0+v*γs[i])
         push!(v1, norm(L__-L_))
         if size(J_)==size(v)
