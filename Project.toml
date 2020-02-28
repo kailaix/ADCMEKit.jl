@@ -1,0 +1,10 @@
+name = "LandscapeView"
+uuid = "3f4c6b62-6995-45a1-94ff-78ad6e58fea9"
+authors = ["Kailai Xu <kailaix@hotmail.com>"]
+version = "0.1.0"
+
+[deps]
+PyPlot = "d330b81b-6aea-500a-939a-2ce795aea3ee"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
