@@ -1,4 +1,4 @@
-export linedata, lineview, meshdata, meshview
+export linedata, lineview, meshdata, meshview, gradview
 function linedata(θ1, θ2=nothing; n = 10)
     if θ2 === nothing
         θ2 = θ1 .* (1 .+ randn(size(θ1)...))
@@ -54,4 +54,31 @@ function meshview(losses, a=1, b=1)
     xlabel("\$\\alpha\$")
     ylabel("\$\\beta\$")
     zlabel("loss")
+end
+
+function gradview(sess, pl, grad, loss, u0)
+    v = rand(length(u0))
+    γs = 1.0 ./ 10 .^ (1:5)
+    v1 = Float64[]
+    v2 = Float64[]
+    L_, J_ = run(sess, [loss, grad], pl=>u0)
+    for i = 1:5
+        L__ = run(sess, loss, pl=>u0+v*γs[i])
+        push!(v1, norm(L__-L_))
+        if size(J_)==size(v)
+            push!(v2, norm(L__-L_-γs[i]*sum(J_.*v)))
+        else
+            push!(v2, norm(L__-L_-γs[i]*J_*v))
+        end
+
+    end
+    close("all")
+    loglog(γs, abs.(v1), "*-", label="finite difference")
+    loglog(γs, abs.(v2), "+-", label="automatic linearization")
+    loglog(γs, γs.^2 * 0.5*abs(v2[1])/γs[1]^2, "--",label="\$\\mathcal{O}(\\gamma^2)\$")
+    loglog(γs, γs * 0.5*abs(v1[1])/γs[1], "--",label="\$\\mathcal{O}(\\gamma)\$")
+    plt.gca().invert_xaxis()
+    legend()
+    xlabel("\$\\gamma\$")
+    ylabel("Error")
 end

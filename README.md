@@ -24,3 +24,14 @@ meshview(l)
 | -------------------- | -------------------- |
 | ![](./others/f1.png) | ![](./others/f2.png) |
 
+
+`gradview(sess, pl, grad, loss, u0)`: use with ADCME.jl to test gradients
+
+```julia
+pl = placeholder(Float64, shape=[2])
+l = sum(pl^2-pl*0.1)
+g = gradients(l, pl)
+sess = Session(); init(sess)
+gradview(sess, pl, g, l, rand(2))
+```
+![](./others/f3.png)
