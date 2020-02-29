@@ -1,4 +1,4 @@
-export linedata, lineview, meshdata, meshview, gradview
+export linedata, lineview, meshdata, meshview, gradview, jacview
 function linedata(θ1, θ2=nothing; n::Integer = 10)
     if θ2 === nothing
         θ2 = θ1 .* (1 .+ randn(size(θ1)...))
@@ -109,4 +109,50 @@ function gradview(sess::PyObject, pl::PyObject, loss::PyObject, u0)
     xlabel("\$\\gamma\$")
     ylabel("Error")
     return v1, v2
+end
+
+
+@doc raw"""
+```julia
+u0 = rand(10)
+function verify_jacobian_f(θ, u)
+    r = u^3+u - u0
+    r, spdiag(3u^2+1.0)
+end
+verify_jacobian(sess, verify_jacobian_f, missing, u0); close("all")
+
+# least square
+u0 = rand(10)
+rs = rand(10)
+function verify_jacobian_f(θ, u)
+    r = [u^2;u] - [rs;rs]
+    r, [spdiag(2*u); spdiag(10)]
+end
+verify_jacobian(sess, verify_jacobian_f, missing, u0); close("all")
+```
+"""
+function jacview(sess::PyObject, f::Function, θ::Union{Array{Float64}, PyObject, Missing}, 
+                u0::Array{Float64}, args...)
+    u = placeholder(Float64, shape=[length(u0)])
+    L, J = f(θ, u)
+    L_ = run(sess, L, u=>u0, args...)
+    J_ = run(sess, J, u=>u0, args...)
+    v = rand(length(u0))
+    γs = 1.0 ./ 10 .^ (1:5)
+    v1 = Float64[]
+    v2 = Float64[]
+    for i = 1:5
+        L__ = run(sess, L, u=>u0+v*γs[i], args...)
+        push!(v1, norm(L__-L_))
+        push!(v2, norm(L__-L_-γs[i]*J_*v))
+    end
+    close("all")
+    loglog(γs, abs.(v1), "*-", label="finite difference")
+    loglog(γs, abs.(v2), "+-", label="automatic linearization")
+    loglog(γs, γs.^2 * 0.5*abs(v2[1])/γs[1]^2, "--",label="\$\\mathcal{O}(\\gamma^2)\$")
+    loglog(γs, γs * 0.5*abs(v1[1])/γs[1], "--",label="\$\\mathcal{O}(\\gamma)\$")
+    plt.gca().invert_xaxis()
+    legend()
+    xlabel("\$\\gamma\$")
+    ylabel("Error")
 end
