@@ -1,4 +1,4 @@
-export linedata, lineview, meshdata, meshview, gradview, jacview
+export linedata, lineview, meshdata, meshview, gradview, jacview, PCLview
 function linedata(θ1, θ2=nothing; n::Integer = 10)
     if θ2 === nothing
         θ2 = θ1 .* (1 .+ randn(size(θ1)...))
@@ -81,8 +81,7 @@ function meshview(sess::PyObject, pl::PyObject, loss::PyObject, θ, a::Real=1, b
     meshview(V, a, b)
 end
 
-function gradview(sess::PyObject, pl::PyObject, loss::PyObject, u0)
-    grad = gradients(loss, pl)
+function gradview(sess::PyObject, pl::PyObject, loss::PyObject, u0, grad::PyObject)
     v = rand(length(u0))
     γs = 1.0 ./ 10 .^ (1:5)
     v1 = Float64[]
@@ -111,6 +110,11 @@ function gradview(sess::PyObject, pl::PyObject, loss::PyObject, u0)
     return v1, v2
 end
 
+function gradview(sess::PyObject, pl::PyObject, loss::PyObject, u0)
+    grad = gradients(loss, pl)
+    gradview(sess, pl, loss, u0, grad)
+end
+
 
 @doc raw"""
 ```julia
@@ -135,6 +139,7 @@ function jacview(sess::PyObject, f::Function, θ::Union{Array{Float64}, PyObject
                 u0::Array{Float64}, args...)
     u = placeholder(Float64, shape=[length(u0)])
     L, J = f(θ, u)
+    init(sess)
     L_ = run(sess, L, u=>u0, args...)
     J_ = run(sess, J, u=>u0, args...)
     v = rand(length(u0))
@@ -145,6 +150,39 @@ function jacview(sess::PyObject, f::Function, θ::Union{Array{Float64}, PyObject
         L__ = run(sess, L, u=>u0+v*γs[i], args...)
         push!(v1, norm(L__-L_))
         push!(v2, norm(L__-L_-γs[i]*J_*v))
+    end
+    close("all")
+    loglog(γs, abs.(v1), "*-", label="finite difference")
+    loglog(γs, abs.(v2), "+-", label="automatic linearization")
+    loglog(γs, γs.^2 * 0.5*abs(v2[1])/γs[1]^2, "--",label="\$\\mathcal{O}(\\gamma^2)\$")
+    loglog(γs, γs * 0.5*abs(v1[1])/γs[1], "--",label="\$\\mathcal{O}(\\gamma)\$")
+    plt.gca().invert_xaxis()
+    legend()
+    xlabel("\$\\gamma\$")
+    ylabel("Error")
+end
+
+
+function PCLview(sess::PyObject, f::Function, L::Function, θ::Union{PyObject,Array{Float64,1}, Float64}, 
+    u0::Union{PyObject, Array{Float64}}, args...; options::Union{Dict{String, T}, Missing}=missing) where T<:Real
+    if isa(θ, PyObject)
+        θ = run(sess, θ, args...)
+    end
+    x = placeholder(Float64, shape=[length(θ)])
+    l, u, g = NonlinearConstrainedProblem(f, L, x, u0; options=options)
+    init(sess)
+    L_ = run(sess, l, x=>θ, args...)
+    J_ = run(sess, g, x=>θ, args...)
+    v = rand(length(x))
+    γs = 1.0 ./ 10 .^ (1:5)
+    v1 = Float64[]
+    v2 = Float64[]
+    for i = 1:5
+        @info i 
+        L__ = run(sess, l, x=>θ+v*γs[i], args...)
+        # @show L__,L_,J_, v
+        push!(v1, L__-L_)
+        push!(v2, L__-L_-γs[i]*sum(J_.*v))
     end
     close("all")
     loglog(γs, abs.(v1), "*-", label="finite difference")
