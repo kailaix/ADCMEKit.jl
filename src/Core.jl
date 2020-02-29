@@ -55,7 +55,6 @@ function meshview(losses::Array{Float64}, a::Real=1, b::Real=1)
     as = LinRange(-a, a, m)
     bs = LinRange(-b, b, n)
     for i = 1:m 
-        @info i, m
         for j = 1:n 
             α[i,j] = as[i]
             β[i,j] = bs[j]
@@ -74,6 +73,7 @@ function meshview(sess::PyObject, pl::PyObject, loss::PyObject, θ, a::Real=1, b
     m, n = size(dat)
     V = zeros(m, n)
     for i = 1:m 
+        @info i, m
         for j = 1:n 
             V[i,j] = run(sess, loss, pl=>dat[i,j])
         end
