@@ -30,14 +30,22 @@ function lineview(sess::PyObject, pl::PyObject, loss::PyObject, θ1, θ2=nothing
     lineview(V)
 end
 
-function meshdata(θ, a::Real=1, b::Real=1, m::Integer=10, n::Integer=10)
+function meshdata(θ;
+     a::Real=1, b::Real=1, m::Integer=10, n::Integer=10 ,direction::Union{Array{<:Real}, Missing}=missing)
+    local δ, γ
     as = LinRange(-a, a, m)
     bs = LinRange(-b, b, n)
     α = zeros(m, n)
     β = zeros(m, n)
     θs = Array{Any}(undef, m, n)
-    δ = randn(size(θ)...)
-    γ = randn(size(θ)...)
+    if !ismissing(direction)
+        δ = direction - θ
+        γ =    randn(size(θ)...)
+        γ = γ/norm(γ)*norm(δ)
+    else
+        δ = randn(size(θ)...)
+        γ = randn(size(θ)...)
+    end
     for i = 1:m 
         for j = 1:n 
             α[i,j] = as[i]
@@ -68,8 +76,10 @@ function meshview(losses::Array{Float64}, a::Real=1, b::Real=1)
     return α, β, losses
 end
 
-function meshview(sess::PyObject, pl::PyObject, loss::PyObject, θ, a::Real=1, b::Real=1, m::Integer=10, n::Integer=10)
-    dat = meshdata(θ, a, b, m, n)
+function meshview(sess::PyObject, pl::PyObject, loss::PyObject, θ; 
+        a::Real=1, b::Real=1, m::Integer=9, n::Integer=9, 
+        direction::Union{Array{<:Real}, Missing}=missing)
+    dat = meshdata(θ; a=a, b=b, m=m, n=n, direction=direction)
     m, n = size(dat)
     V = zeros(m, n)
     for i = 1:m 
@@ -111,7 +121,7 @@ function gradview(sess::PyObject, pl::PyObject, loss::PyObject, u0, grad::PyObje
 end
 
 function gradview(sess::PyObject, pl::PyObject, loss::PyObject, u0)
-    grad = gradients(loss, pl)
+    grad = tf.convert_to_tensor(gradients(loss, pl))
     gradview(sess, pl, loss, u0, grad)
 end
 
