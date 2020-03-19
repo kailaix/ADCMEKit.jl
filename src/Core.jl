@@ -92,7 +92,12 @@ function meshview(sess::PyObject, pl::PyObject, loss::PyObject, θ;
 end
 
 function gradview(sess::PyObject, pl::PyObject, loss::PyObject, u0, grad::PyObject)
-    v = rand(length(u0))
+    local v 
+    if length(size(u0))==0
+        v = rand()
+    else
+        v = rand(length(u0))
+    end
     γs = 1.0 ./ 10 .^ (1:5)
     v1 = Float64[]
     v2 = Float64[]
@@ -102,7 +107,11 @@ function gradview(sess::PyObject, pl::PyObject, loss::PyObject, u0, grad::PyObje
         L__ = run(sess, loss, pl=>u0+v*γs[i])
         push!(v1, norm(L__-L_))
         if size(J_)==size(v)
-            push!(v2, norm(L__-L_-γs[i]*sum(J_.*v)))
+            if length(size(J_))==0
+                push!(v2, norm(L__-L_-γs[i]*sum(J_*v)))
+            else
+                push!(v2, norm(L__-L_-γs[i]*sum(J_.*v)))
+            end
         else
             push!(v2, norm(L__-L_-γs[i]*J_*v))
         end
