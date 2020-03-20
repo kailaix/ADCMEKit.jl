@@ -56,3 +56,16 @@ gradview(sess, pl, l, rand(2))
 | `lineview`           | `meshview`      | `gradview` |
 | -------------------- | -------------------- | -------------------- |
 | ![](./others/f4.png) | ![](./others/f5.png) | ![](./others/f3.png) |
+
+
+## Units
+The `Unit` module provides an interface to [Unitful.jl](https://github.com/PainterQubits/Unitful.jl)
+
+```julia
+Pa, kg, m, s = Unit.u"Pa, kg, m, s"
+Unit.preferunits(Unit.u"g")
+rho = 1000 * kg/m^3  |> value
+K = 1e-7 * m^2/Pa/s |> value
+qi = 10.0 * m^3/s |> value
+qo = 0.0 * m^3/s |> value
+```

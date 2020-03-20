@@ -7,6 +7,7 @@ import PyCall:PyObject
 using ADCME
 
 
+
 animation_ = PyCall.PyNULL()
 function __init__()
     global animation_
@@ -14,6 +15,7 @@ function __init__()
 end
 include("Core.jl")
 include("Visualization.jl")
+include("Unit.jl")
 
 
 end # module
