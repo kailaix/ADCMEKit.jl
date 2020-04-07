@@ -6,13 +6,14 @@ import PyCall
 import PyCall:PyObject
 using ADCME
 
+export tikz 
 
-mpl = PyCall.PyNULL()
+tikz = PyCall.PyNULL()
 animation_ = PyCall.PyNULL()
 function __init__()
-    global animation_, mpl 
+    global animation_, tikz 
     copy!(animation_,PyCall.pyimport("matplotlib.animation"))
-    copy!(mpl,PyCall.pyimport("tikzplotlib"))
+    copy!(tikz,PyCall.pyimport("tikzplotlib"))
 end
 include("Core.jl")
 include("Visualization.jl")
