@@ -20,6 +20,22 @@ function lineview(losses::Array{Float64})
     grid("on")
 end
 
+
+@docs raw"""
+    lineview(sess::PyObject, pl::PyObject, loss::PyObject, θ1, θ2=nothing; n::Integer = 10)
+
+Plots the function 
+
+$$h(α) = f((1-α)θ_1 + αθ_2)$$
+
+# Example
+```julia
+pl = placeholder(Float64, shape=[2])
+l = sum(pl^2-pl*0.1)
+sess = Session(); init(sess)
+lineview(sess, pl, l, rand(2))
+```
+"""
 function lineview(sess::PyObject, pl::PyObject, loss::PyObject, θ1, θ2=nothing; n::Integer = 10)
     dat = linedata(θ1, θ2, n=n)
     V = zeros(length(dat))
@@ -129,14 +145,15 @@ function pcolormeshview(sess::PyObject, pl::PyObject, loss::PyObject, θ;
 end
 
 
-function gradview(sess::PyObject, pl::PyObject, loss::PyObject, u0, grad::PyObject)
+function gradview(sess::PyObject, pl::PyObject, loss::PyObject, u0, grad::PyObject; 
+    scale::Float64 = 1.0)
     local v 
     if length(size(u0))==0
         v = rand()
     else
         v = rand(length(u0))
     end
-    γs = 1.0 ./ 10 .^ (1:5)
+    γs = scale ./ 10 .^ (1:5)
     v1 = Float64[]
     v2 = Float64[]
     L_, J_ = run(sess, [loss, grad], pl=>u0)
@@ -167,9 +184,9 @@ function gradview(sess::PyObject, pl::PyObject, loss::PyObject, u0, grad::PyObje
     return v1, v2
 end
 
-function gradview(sess::PyObject, pl::PyObject, loss::PyObject, u0)
+function gradview(sess::PyObject, pl::PyObject, loss::PyObject, u0; scale::Float64 = 1.0)
     grad = tf.convert_to_tensor(gradients(loss, pl))
-    gradview(sess, pl, loss, u0, grad)
+    gradview(sess, pl, loss, u0, grad, scale = scale)
 end
 
 
