@@ -21,7 +21,7 @@ function lineview(losses::Array{Float64})
 end
 
 
-@docs raw"""
+@doc raw"""
     lineview(sess::PyObject, pl::PyObject, loss::PyObject, θ1, θ2=nothing; n::Integer = 10)
 
 Plots the function 
