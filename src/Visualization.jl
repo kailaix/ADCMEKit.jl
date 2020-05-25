@@ -33,5 +33,9 @@ end
 Saves the animation produced by [`animate`](@ref)
 """
 function saveanim(anim::PyObject, filename::String; kwargs...)
-    anim.save(filename, "imagemagick"; kwargs...)
+    if Sys.iswindows()
+        anim.save(filename, "ffmpeg"; kwargs...)
+    else
+        anim.save(filename, "imagemagick"; kwargs...)
+    end
 end

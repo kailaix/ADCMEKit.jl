@@ -5,6 +5,9 @@ if !("tikzplotlib" in Conda._installed_packages())
     Conda.add("tikzplotlib", channel="conda-forge")
 end
 
-if !("imagemagick" in Conda._installed_packages())
-    Conda.add("imagemagick", channel="conda-forge")
+image_writer = Sys.iswindows() ? "ffmpeg" : "imagemagick"
+
+if !(image_writer in Conda._installed_packages())
+    Conda.add(image_writer, channel="conda-forge")
 end
+
