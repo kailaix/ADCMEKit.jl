@@ -1,7 +1,7 @@
 name = "ADCMEKit"
 uuid = "b6719975-6fcd-4453-92fa-4206f52c3839"
 authors = ["Kailai Xu <kailaix@hotmail.com>"]
-version = "0.2.1"
+version = "0.2.2"
 
 [deps]
 ADCME = "07b341a0-ce75-57c6-b2de-414ffdc00be5"
