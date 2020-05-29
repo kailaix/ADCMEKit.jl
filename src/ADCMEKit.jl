@@ -6,7 +6,6 @@ import PyCall
 import PyCall:PyObject
 using ADCME
 
-export tikz 
 
 tikz = PyCall.PyNULL()
 animation_ = PyCall.PyNULL()

@@ -1,4 +1,4 @@
-export animate, saveanim
+export animate, saveanim, save_tikz
 
 @doc raw"""
     animate(update::Function, frames; kwargs...)
@@ -38,4 +38,16 @@ function saveanim(anim::PyObject, filename::String; kwargs...)
     else
         anim.save(filename, "imagemagick"; kwargs...)
     end
+end
+
+
+"""
+    save_tikz(filename::String)
+
+Saves the current figure to tex files. 
+"""
+function save_tikz(filename::String)
+    open(filename, "w") do io
+        write(io, tikz.get_tikz_code())
+    end 
 end
