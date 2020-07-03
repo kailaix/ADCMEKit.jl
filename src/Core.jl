@@ -184,6 +184,15 @@ function gradview(sess::PyObject, pl::PyObject, loss::PyObject, u0, grad::PyObje
     return v1, v2
 end
 
+
+"""
+    gradview(sess::PyObject, pl::PyObject, loss::PyObject, u0; scale::Float64 = 1.0)
+
+Visualizes the automatic differentiation and finite difference convergence converge. For correctly implemented
+differentiable codes, the convergence rate for AD should be 2 and for FD should be 1 (if not evaluated at stationary point).
+
+- `scale`: you can control the step size for perturbation. 
+"""
 function gradview(sess::PyObject, pl::PyObject, loss::PyObject, u0; scale::Float64 = 1.0)
     grad = tf.convert_to_tensor(gradients(loss, pl))
     gradview(sess, pl, loss, u0, grad, scale = scale)
