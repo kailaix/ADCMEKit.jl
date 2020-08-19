@@ -146,7 +146,7 @@ end
 
 
 function gradview(sess::PyObject, pl::PyObject, loss::PyObject, u0, grad::PyObject; 
-    scale::Float64 = 1.0)
+    scale::Float64 = 1.0, mpi::Bool = false)
     local v 
     if length(size(u0))==0
         v = rand()
@@ -156,7 +156,8 @@ function gradview(sess::PyObject, pl::PyObject, loss::PyObject, u0, grad::PyObje
     γs = scale ./ 10 .^ (1:5)
     v1 = Float64[]
     v2 = Float64[]
-    L_, J_ = run(sess, [loss, grad], pl=>u0)
+    L_ = run(sess, loss, pl=>u0)
+    J_ = run(sess, grad, pl=>u0)
     for i = 1:5
         @info i 
         L__ = run(sess, loss, pl=>u0+v*γs[i])
@@ -172,15 +173,21 @@ function gradview(sess::PyObject, pl::PyObject, loss::PyObject, u0, grad::PyObje
         end
 
     end
-    close("all")
-    loglog(γs, abs.(v1), "*-", label="finite difference")
-    loglog(γs, abs.(v2), "+-", label="automatic linearization")
-    loglog(γs, γs.^2 * 0.5*abs(v2[1])/γs[1]^2, "--",label="\$\\mathcal{O}(\\gamma^2)\$")
-    loglog(γs, γs * 0.5*abs(v1[1])/γs[1], "--",label="\$\\mathcal{O}(\\gamma)\$")
-    plt.gca().invert_xaxis()
-    legend()
-    xlabel("\$\\gamma\$")
-    ylabel("Error")
+    if !(mpi) || (mpi && mpi_rank()==0)
+        close("all")
+        loglog(γs, abs.(v1), "*-", label="finite difference")
+        loglog(γs, abs.(v2), "+-", label="automatic linearization")
+        loglog(γs, γs.^2 * 0.5*abs(v2[1])/γs[1]^2, "--",label="\$\\mathcal{O}(\\gamma^2)\$")
+        loglog(γs, γs * 0.5*abs(v1[1])/γs[1], "--",label="\$\\mathcal{O}(\\gamma)\$")
+        plt.gca().invert_xaxis()
+        legend()
+        xlabel("\$\\gamma\$")
+        ylabel("Error")
+        if mpi 
+            savefig("mpi_gradview.png")
+        end
+    end
+
     return v1, v2
 end
 
@@ -193,9 +200,9 @@ differentiable codes, the convergence rate for AD should be 2 and for FD should 
 
 - `scale`: you can control the step size for perturbation. 
 """
-function gradview(sess::PyObject, pl::PyObject, loss::PyObject, u0; scale::Float64 = 1.0)
+function gradview(sess::PyObject, pl::PyObject, loss::PyObject, u0; scale::Float64 = 1.0, mpi::Bool = false)
     grad = tf.convert_to_tensor(gradients(loss, pl))
-    gradview(sess, pl, loss, u0, grad, scale = scale)
+    gradview(sess, pl, loss, u0, grad, scale = scale, mpi = mpi)
 end
 
 

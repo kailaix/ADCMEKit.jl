@@ -25,6 +25,5 @@ function __init__()
 end
 include("Core.jl")
 include("Visualization.jl")
-include("SMT.jl")
 
 end # module
