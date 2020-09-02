@@ -17,10 +17,10 @@ function __init__()
 
     if Sys.iswindows()
         if !occursin(joinpath(Conda.ROOTENV, "Scripts"), replace(ENV["PATH"], "\\\\"=>"\\"))
-            @warn """$(joinpath(Conda.ROOTENV, "Scripts")) is not in the system path. This will make SMT unavailable from command line"""
+            @warn """$(joinpath(Conda.ROOTENV, "Scripts")) is not in the system path. Some of the ADCMEKit tools may break."""
         end
     elseif !occursin(Conda.BINDIR, ENV["PATH"])
-        @warn """$(Conda.BINDIR) is not in the system path. This will make SMT unavailable from command line"""
+        @warn """$(Conda.BINDIR) is not in the system path. Some of the ADCMEKit tools may break."""
     end
 end
 include("Core.jl")

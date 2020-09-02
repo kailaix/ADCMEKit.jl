@@ -1,32 +1,17 @@
 push!(LOAD_PATH, "@stdlib")
-using Conda
 using LibGit2
+using ADCME 
 PWD = pwd()
 
-if Sys.iswindows()
-    ENV["PATH"] = joinpath(Conda.BINDIR)*";"*ENV["PATH"]
+CONDA = get_conda()
+
+PKGS = read_with_env(`$CONDA list`)
+if !(occursin("tikzplotlib", PKGS))
+    run_with_env("$CONDA install -c conda-forge tikzplotlib")
 end
 
-# rm(joinpath(Conda.LIBDIR, "Sumatra"), recursive=true, force=true)
-if !isdir(joinpath(Conda.LIBDIR, "Sumatra"))
-    LibGit2.clone("https://github.com/ADCMEMarket/Sumatra", joinpath(Conda.LIBDIR, "Sumatra"))
-    cd(joinpath(Conda.LIBDIR, "Sumatra"))
-    if Sys.iswindows()
-        run(`$(joinpath(Conda.PYTHONDIR, "python.exe")) setup.py install`)
-    else
-        run(`$(joinpath(Conda.PYTHONDIR, "python")) setup.py install`)
-    end
-end
-
-
-if !("tikzplotlib" in Conda._installed_packages())
-    Conda.add("tikzplotlib", channel="conda-forge")
-end
-
-image_writer = "imagemagick"
-
-if !(Sys.iswindows()) && !(image_writer in Conda._installed_packages())
-    Conda.add(image_writer, channel="conda-forge")
+if !(Sys.iswindows()) && !(occursin("imagemagick", PKGS))
+    run_with_env("$CONDA install -c conda-forge imagemagick")
 end
 
 cd(PWD)
